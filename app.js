@@ -243,19 +243,25 @@ function renderUpcomingBirthdays() {
 function renderFriends() {
   renderHealthDashboard();
   renderUpcomingBirthdays();
+  renderLocationFilters();
 
   const list = document.getElementById('friendsList');
 
-  if (friends.length === 0) {
+  // 依地點篩選
+  const displayFriends = currentLocationFilter
+    ? friends.filter(f => (f.meetLocation || '').trim() === currentLocationFilter)
+    : friends;
+
+  if (displayFriends.length === 0) {
     list.innerHTML = `
       <div class="empty-state">
-        <span class="empty-state-icon">👋</span>
-        還沒有朋友記錄<br>快來新增第一位朋友吧！
+        <span class="empty-state-icon">${friends.length === 0 ? '👋' : '📍'}</span>
+        ${friends.length === 0 ? '還沒有朋友記錄<br>快來新增第一位朋友吧！' : '沒有在此地點認識的朋友'}
       </div>`;
     return;
   }
 
-  list.innerHTML = friends.map(f => {
+  list.innerHTML = displayFriends.map(f => {
     const days = daysSince(f.date);
     const avatarInner = f.photo
       ? `<img src="${f.photo}" alt="${escapeHtml(f.name)}">`
@@ -275,6 +281,10 @@ function renderFriends() {
       bdHtml = `<div class="friend-birthday-tag" style="color:${thisMonth ? '#DB2777' : 'var(--text-2)'};font-size:12px;">${thisMonth ? '🌸' : '🎂'} 生日還有 ${bdDays} 天</div>`;
     }
 
+    const locHtml = f.meetLocation
+      ? `<div class="friend-location-tag">📍 ${escapeHtml(f.meetLocation)}</div>`
+      : '';
+
     return `
       <div class="friend-card${isToday ? ' is-birthday' : ''}" data-id="${escapeHtml(f.id)}">
         <div class="health-dot ${hi.cls}"></div>
@@ -284,6 +294,7 @@ function renderFriends() {
           <div class="friend-days">${formatDays(days)}</div>
           <div class="friend-since">從 ${f.date} 開始</div>
           ${bdHtml}
+          ${locHtml}
         </div>
         <button class="delete-btn" data-id="${escapeHtml(f.id)}" aria-label="刪除">✕</button>
       </div>`;
@@ -299,7 +310,7 @@ function addFriend() {
   if (!name) { nameEl.classList.add('error'); valid = false; }
   if (!date) { dateEl.classList.add('error'); valid = false; }
   if (!valid) return;
-  friends.unshift({ id: Date.now().toString(36), name, date, photo: null, note: '', noteImages: [], birthday: null });
+  friends.unshift({ id: Date.now().toString(36), name, date, photo: null, note: '', noteImages: [], birthday: null, meetLocation: '' });
   saveData();
   nameEl.value = '';
   setDefaultDate();
@@ -325,6 +336,13 @@ function openFriendDetail(id) {
   document.getElementById('detailDays').textContent = formatDays(daysSince(f.date));
   document.getElementById('detailSince').textContent = `從 ${f.date} 開始`;
   document.getElementById('detailNote').value = f.note || '';
+
+  // 相遇地點
+  const loc = f.meetLocation || '';
+  document.getElementById('detailLocation').value = loc;
+  const locHint = document.getElementById('locationHint');
+  if (loc.trim()) locHint.classList.remove('hidden');
+  else locHint.classList.add('hidden');
 
   // 生日
   populateBirthdayDays();
@@ -737,12 +755,229 @@ function checkBirthdayCelebration() {
   launchConfetti();
 }
 
+// ── 天氣系統 ────────────────────────────────────────
+
+const WEATHER_CACHE_KEY = 'rt_weather_cache';
+const WEATHER_CACHE_DURATION = 30 * 60 * 1000; // 30 分鐘
+
+// 依 weathercode 取得天氣資訊
+function getWeatherInfo(code) {
+  if (code === 0)           return { icon: '☀️', desc: '晴朗',    grad: 'linear-gradient(135deg,#FF9A3C,#FFD166)', cls: 'weather-sunny' };
+  if (code <= 3)            return { icon: '⛅', desc: '多雲',    grad: 'linear-gradient(135deg,#667eea,#8FA8D4)', cls: 'weather-cloudy' };
+  if (code <= 48)           return { icon: '🌫️', desc: '有霧',    grad: 'linear-gradient(135deg,#8E9EAB,#b0bec5)', cls: 'weather-fog' };
+  if (code <= 67)           return { icon: '🌧️', desc: '下雨',    grad: 'linear-gradient(135deg,#4A90D9,#5E7CC4)', cls: 'weather-rain' };
+  if (code <= 77)           return { icon: '❄️', desc: '下雪',    grad: 'linear-gradient(135deg,#74b9ff,#a29bfe)', cls: 'weather-snow' };
+  if (code <= 82)           return { icon: '🌦️', desc: '陣雨',    grad: 'linear-gradient(135deg,#4A90D9,#8FA8D4)', cls: 'weather-shower' };
+  if (code <= 86)           return { icon: '❄️', desc: '雪陣',    grad: 'linear-gradient(135deg,#74b9ff,#dfe6e9)', cls: 'weather-snow' };
+  return                         { icon: '⛈️', desc: '雷雨',    grad: 'linear-gradient(135deg,#2D3561,#5C5EA5)', cls: 'weather-thunder' };
+}
+
+function renderWeather(data) {
+  const card = document.getElementById('weatherCard');
+  card.classList.remove('hidden');
+  const w = getWeatherInfo(data.code);
+  card.style.background = w.grad;
+  card.className = `weather-card ${w.cls}`;
+  card.innerHTML = `
+    <div class="weather-main">
+      <span class="weather-icon-big">${w.icon}</span>
+      <div class="weather-info">
+        <div class="weather-temp">${data.temp}°C</div>
+        <div class="weather-desc">${w.desc}</div>
+      </div>
+    </div>
+    <div class="weather-footer">💨 ${data.wind} km/h &nbsp;·&nbsp; 更新 ${data.updatedAt}</div>`;
+}
+
+function renderWeatherError(msg) {
+  const card = document.getElementById('weatherCard');
+  card.classList.remove('hidden');
+  card.style.background = 'linear-gradient(135deg,#D1D5DB,#9CA3AF)';
+  card.className = 'weather-card';
+  card.innerHTML = `<div class="weather-error">${msg}</div>`;
+}
+
+async function fetchWeather() {
+  // 先嘗試快取
+  try {
+    const cached = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY) || 'null');
+    if (cached && Date.now() - cached.timestamp < WEATHER_CACHE_DURATION) {
+      renderWeather(cached.data);
+      return;
+    }
+  } catch {}
+
+  if (!navigator.geolocation) { renderWeatherError('裝置不支援定位'); return; }
+
+  const card = document.getElementById('weatherCard');
+  card.classList.remove('hidden');
+  card.style.background = 'linear-gradient(135deg,#667eea,#764ba2)';
+  card.innerHTML = '<div class="weather-loading">🌍 正在取得天氣…</div>';
+
+  navigator.geolocation.getCurrentPosition(
+    async pos => {
+      const { latitude: lat, longitude: lon } = pos.coords;
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,windspeed_10m`;
+        const res = await fetch(url);
+        const json = await res.json();
+        const data = {
+          temp: Math.round(json.current.temperature_2m),
+          code: json.current.weathercode,
+          wind: Math.round(json.current.windspeed_10m),
+          updatedAt: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+        };
+        localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+        renderWeather(data);
+      } catch {
+        renderWeatherError('無法取得天氣資料');
+      }
+    },
+    () => renderWeatherError('請允許定位以顯示天氣 📍'),
+    { timeout: 10000 }
+  );
+}
+
+// ── 地點篩選 ────────────────────────────────────────
+
+let currentLocationFilter = null;
+
+function getAllLocations() {
+  const locs = new Set();
+  friends.forEach(f => { if (f.meetLocation && f.meetLocation.trim()) locs.add(f.meetLocation.trim()); });
+  return [...locs];
+}
+
+function renderLocationFilters() {
+  const locs = getAllLocations();
+  const section = document.getElementById('locationFilterSection');
+  if (locs.length === 0) { section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
+  section.innerHTML = `
+    <div class="location-filter-title">📍 依地點篩選</div>
+    <div class="location-filter-tags">
+      <button class="location-tag${currentLocationFilter === null ? ' active' : ''}" data-loc="">全部</button>
+      ${locs.map(l => `<button class="location-tag${currentLocationFilter === l ? ' active' : ''}" data-loc="${escapeHtml(l)}">${escapeHtml(l)}</button>`).join('')}
+    </div>`;
+}
+
+// ── 回憶時間軸 ──────────────────────────────────────
+
+let currentMemoryFilter = 'all';
+
+const MOOD_LINE_COLORS = {
+  '😊': '#FCD34D',
+  '😢': '#93C5FD',
+  '😡': '#FCA5A5',
+  '😴': '#C4B5FD',
+  '😍': '#F9A8D4',
+};
+
+function getAllMemoryEvents() {
+  const events = [];
+
+  // 心情日記
+  Object.entries(moods).forEach(([date, data]) => {
+    events.push({ type: 'diary', date, emoji: data.emoji, note: data.note || '', color: MOOD_LINE_COLORS[data.emoji] || '#D1D5DB', friend: null });
+  });
+
+  // 朋友動態
+  friends.forEach(f => {
+    // 認識里程碑
+    events.push({ type: 'milestone', date: f.date, content: `開始認識 ${f.name}！`, friend: f, color: '#FED7AA', icon: '🤝' });
+    // 備註（有填寫才加入）
+    if (f.note && f.note.trim()) {
+      events.push({ type: 'note', date: f.date, content: f.note, friend: f, color: '#A7F3D0', icon: '📝' });
+    }
+  });
+
+  // 已開啟膠囊
+  capsules.filter(c => isCapsuleUnlocked(c)).forEach(c => {
+    const friend = c.friendId ? friends.find(f => f.id === c.friendId) : null;
+    events.push({ type: 'capsule', date: c.unlockDate, title: c.title, content: c.content, photo: c.photo, friend, color: '#DDD6FE', icon: '📬' });
+  });
+
+  return events.sort((a, b) => b.date.localeCompare(a.date));
+}
+
+function renderMemories(filter) {
+  currentMemoryFilter = filter || 'all';
+  document.querySelectorAll('.memory-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === currentMemoryFilter);
+  });
+
+  let events = getAllMemoryEvents();
+  if (currentMemoryFilter !== 'all') {
+    const typeMap = { diary: ['diary'], friend: ['milestone', 'note'], capsule: ['capsule'] };
+    const allowed = typeMap[currentMemoryFilter] || [];
+    events = events.filter(e => allowed.includes(e.type));
+  }
+
+  const container = document.getElementById('memoriesTimeline');
+  if (events.length === 0) {
+    container.innerHTML = `<div class="empty-state"><span class="empty-state-icon">🌟</span>還沒有相關回憶<br>記錄你的心情和朋友故事吧！</div>`;
+    return;
+  }
+  container.innerHTML = events.map((e, i) => buildMemoryCard(e, i)).join('');
+}
+
+function buildMemoryCard(e, idx) {
+  const DAY = ['日','一','二','三','四','五','六'];
+  const [y, m, d] = e.date.split('-').map(Number);
+  const dow = new Date(y, m-1, d).getDay();
+  const dateLabel = `${y}/${pad(m)}/${pad(d)}（${DAY[dow]}）`;
+
+  const typeLabels = { diary:'心情日記', milestone:'關係里程碑', note:'朋友備註', capsule:'回憶膠囊' };
+  const mainIcon = e.emoji || e.icon || '📖';
+  const rawContent = e.note || e.content || '';
+  const summary = rawContent.length > 50 ? rawContent.slice(0, 50) + '…' : rawContent;
+
+  let friendBadge = '';
+  if (e.friend) {
+    const f = e.friend;
+    const av = f.photo
+      ? `<img src="${f.photo}" alt="${escapeHtml(f.name)}">`
+      : escapeHtml(Array.from(f.name)[0]);
+    const locTag = f.meetLocation ? `<span class="memory-loc-tag">📍 ${escapeHtml(f.meetLocation)}</span>` : '';
+    friendBadge = `<div class="memory-friend-badge">
+      <div class="memory-avatar">${av}</div>
+      <span class="memory-friend-name">${escapeHtml(f.name)}</span>
+      ${locTag}
+    </div>`;
+  }
+
+  const photoHtml = e.photo ? `<img class="memory-photo-thumb" src="${e.photo}" alt="回憶照片">` : '';
+  const titleHtml = e.title ? `<div class="memory-title">${escapeHtml(e.title)}</div>` : '';
+
+  return `<div class="memory-card" data-index="${idx}">
+    <div class="memory-timeline-col">
+      <div class="memory-dot" style="background:${e.color};border-color:${e.color}"></div>
+      <div class="memory-line" style="background:${e.color}"></div>
+    </div>
+    <div class="memory-content">
+      <div class="memory-header">
+        <span class="memory-date">${dateLabel}</span>
+        <span class="memory-type-tag">${typeLabels[e.type] || ''}</span>
+      </div>
+      ${friendBadge}
+      <div class="memory-body">
+        <span class="memory-main-icon">${mainIcon}</span>
+        <div class="memory-text">
+          ${titleHtml}
+          ${summary ? `<div class="memory-summary">${escapeHtml(summary)}</div>` : ''}
+        </div>
+      </div>
+      ${photoHtml}
+    </div>
+  </div>`;
+}
+
 // ── Navigation ─────────────────────────────────────
 function switchPage(page) {
   currentPage = page;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const titles = { friends:'朋友列表', diary:'心情日記', capsule:'回憶膠囊', settings:'設定' };
+  const titles = { friends:'朋友列表', diary:'心情日記', capsule:'回憶膠囊', memories:'珍貴回憶', settings:'設定' };
   document.getElementById('pageTitle').textContent = titles[page] || '';
   if (page === 'friends') {
     document.getElementById('friendsPage').classList.add('active');
@@ -753,6 +988,9 @@ function switchPage(page) {
   } else if (page === 'capsule') {
     document.getElementById('capsulePage').classList.add('active');
     renderCapsules();
+  } else if (page === 'memories') {
+    document.getElementById('memoriesPage').classList.add('active');
+    renderMemories(currentMemoryFilter);
   } else if (page === 'settings') {
     document.getElementById('settingsPage').classList.add('active');
   }
@@ -1064,6 +1302,44 @@ document.getElementById('applyCustomTheme').addEventListener('click', () => {
   document.getElementById(id).addEventListener('input', function() { this.classList.remove('error'); });
 });
 
+// 儲存地點
+document.getElementById('saveLocationBtn').addEventListener('click', () => {
+  if (!currentDetailId) return;
+  const f = friends.find(x => x.id === currentDetailId);
+  if (!f) return;
+  const loc = document.getElementById('detailLocation').value.trim();
+  f.meetLocation = loc;
+  saveData();
+  const hint = document.getElementById('locationHint');
+  if (loc) hint.classList.remove('hidden');
+  else hint.classList.add('hidden');
+  const btn = document.getElementById('saveLocationBtn');
+  btn.textContent = '已儲存 ✓';
+  setTimeout(() => { btn.textContent = '儲存地點'; }, 1500);
+});
+
+// 地點篩選
+document.getElementById('locationFilterSection').addEventListener('click', e => {
+  const tag = e.target.closest('.location-tag');
+  if (!tag) return;
+  const loc = tag.dataset.loc;
+  currentLocationFilter = loc || null;
+  renderFriends();
+});
+
+// 回憶時間軸篩選
+document.getElementById('memoriesTimeline').addEventListener('click', e => {
+  const card = e.target.closest('.memory-card');
+  if (!card) return;
+  card.classList.toggle('expanded');
+});
+
+document.querySelectorAll('.memory-filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    renderMemories(this.dataset.filter);
+  });
+});
+
 // ── Service Worker ─────────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
@@ -1075,3 +1351,4 @@ loadTheme();
 setDefaultDate();
 renderFriends();
 checkBirthdayCelebration();
+fetchWeather();

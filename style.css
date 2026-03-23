@@ -1523,5 +1523,342 @@ body {
   font-weight: 600;
 }
 
-/* ── Bottom nav 4 tabs ───────────────────────────── */
-.nav-label { font-size: 10px; }
+/* ── Bottom nav 5 tabs ───────────────────────────── */
+.nav-label { font-size: 9px; }
+.nav-icon  { font-size: 20px; }
+
+/* ── 天氣卡片 ─────────────────────────────────────── */
+.weather-card {
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  color: #fff;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.6s ease;
+}
+
+.weather-card.hidden { display: none; }
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.weather-icon-big {
+  font-size: 44px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* 晴天旋轉動畫 */
+.weather-sunny .weather-icon-big {
+  animation: sunSpin 8s linear infinite;
+}
+@keyframes sunSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* 雨天滴落動畫（用 after 偽元素模擬） */
+.weather-rain .weather-icon-big,
+.weather-shower .weather-icon-big {
+  animation: rainDrop 1.2s ease-in-out infinite alternate;
+}
+@keyframes rainDrop {
+  from { transform: translateY(0); }
+  to   { transform: translateY(4px); }
+}
+
+.weather-info { flex: 1; }
+
+.weather-temp {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.weather-desc {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.92;
+}
+
+.weather-footer {
+  font-size: 11px;
+  opacity: 0.78;
+  margin-top: 10px;
+}
+
+.weather-loading, .weather-error {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.9;
+  padding: 8px 0;
+}
+
+/* ── 地點篩選 ─────────────────────────────────────── */
+.location-filter-section {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+
+.location-filter-section.hidden { display: none; }
+
+.location-filter-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.location-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.location-tag {
+  padding: 6px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.location-tag.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* 朋友卡片地點標籤 */
+.friend-location-tag {
+  font-size: 11px;
+  color: var(--text-2);
+  margin-top: 3px;
+}
+
+/* 詳情頁地點提示 */
+.location-hint {
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 600;
+  margin: 6px 0 10px;
+}
+
+.location-hint.hidden { display: none; }
+
+/* ── 回憶時間軸 ───────────────────────────────────── */
+.memories-filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.memories-filter-bar::-webkit-scrollbar { display: none; }
+
+.memory-filter-btn {
+  padding: 7px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s;
+  flex-shrink: 0;
+}
+
+.memory-filter-btn.active {
+  background: var(--grad);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.memories-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-bottom: 8px;
+}
+
+.memory-card {
+  display: flex;
+  gap: 0;
+  animation: slideIn 0.22s ease both;
+}
+
+.memory-timeline-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  margin-right: 12px;
+}
+
+.memory-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px var(--border);
+  flex-shrink: 0;
+  margin-top: 14px;
+  z-index: 1;
+}
+
+.memory-line {
+  width: 3px;
+  flex: 1;
+  min-height: 20px;
+  border-radius: 2px;
+  opacity: 0.35;
+  margin-top: 4px;
+}
+
+.memory-content {
+  flex: 1;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  padding: 14px 14px 12px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+  cursor: pointer;
+  transition: box-shadow 0.18s;
+}
+
+.memory-content:hover { box-shadow: var(--shadow-md); }
+
+.memory-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.memory-date {
+  font-size: 12px;
+  color: var(--text-2);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.memory-type-tag {
+  font-size: 10px;
+  color: var(--primary);
+  background: var(--primary-pale);
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.memory-friend-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.memory-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--grad);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.memory-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.memory-friend-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.memory-loc-tag {
+  font-size: 11px;
+  color: var(--text-2);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1px 7px;
+}
+
+.memory-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.memory-main-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  line-height: 1.3;
+}
+
+.memory-text { flex: 1; min-width: 0; }
+
+.memory-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.memory-summary {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.memory-photo-thumb {
+  width: 100%;
+  max-height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-top: 10px;
+  display: block;
+}
+
+/* 展開狀態：顯示更多內容（透過 expanded class） */
+.memory-card.expanded .memory-summary {
+  /* 展開時不截斷，但目前 summary 已在 JS 生成，這裡只做視覺提示 */
+  color: var(--text);
+}

@@ -27,6 +27,8 @@
           <input type="date" id="friendDate" class="input">
           <button id="addFriendBtn" class="btn btn-primary">新增朋友</button>
         </div>
+        <!-- 天氣卡片 -->
+        <div id="weatherCard" class="weather-card hidden"></div>
         <!-- 關係健康度儀表板（可收合） -->
         <div class="health-card" id="healthDashboard">
           <button class="health-header" id="healthToggle">
@@ -39,6 +41,8 @@
         </div>
         <!-- 即將生日 -->
         <div id="upcomingBirthdays"></div>
+        <!-- 地點篩選 -->
+        <div id="locationFilterSection" class="location-filter-section hidden"></div>
         <div id="friendsList" class="friends-list"></div>
       </section>
 
@@ -62,6 +66,17 @@
       <!-- Capsule Page -->
       <section id="capsulePage" class="page">
         <div id="capsuleList" class="capsule-list"></div>
+      </section>
+
+      <!-- Memories Page -->
+      <section id="memoriesPage" class="page">
+        <div class="memories-filter-bar">
+          <button class="memory-filter-btn active" data-filter="all">全部</button>
+          <button class="memory-filter-btn" data-filter="diary">日記</button>
+          <button class="memory-filter-btn" data-filter="friend">朋友動態</button>
+          <button class="memory-filter-btn" data-filter="capsule">膠囊</button>
+        </div>
+        <div id="memoriesTimeline" class="memories-timeline"></div>
       </section>
 
       <!-- Settings Page -->
@@ -135,6 +150,10 @@
         <span class="nav-icon">📦</span>
         <span class="nav-label">膠囊</span>
       </button>
+      <button class="nav-item" data-page="memories">
+        <span class="nav-icon">🌟</span>
+        <span class="nav-label">回憶</span>
+      </button>
       <button class="nav-item" data-page="settings">
         <span class="nav-icon">⚙️</span>
         <span class="nav-label">設定</span>
@@ -177,6 +196,14 @@
           <button id="saveBirthdayBtn" class="btn btn-primary bday-save-btn">儲存</button>
         </div>
         <div id="birthdayInfo" class="birthday-info"></div>
+      </div>
+
+      <!-- 相遇地點 -->
+      <div class="detail-section">
+        <div class="detail-section-label">📍 相遇地點</div>
+        <input type="text" id="detailLocation" class="input" placeholder="例如：台北咖啡廳、學校圖書館" maxlength="30">
+        <div id="locationHint" class="location-hint hidden">你們在這裡相遇 📍</div>
+        <button id="saveLocationBtn" class="btn btn-primary">儲存地點</button>
       </div>
 
       <!-- 備註文字 -->
