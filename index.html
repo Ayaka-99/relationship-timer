@@ -158,9 +158,13 @@
 
   <!-- Mood Modal -->
   <div id="moodModal" class="modal-overlay hidden">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <h3 id="modalDate" class="modal-title"></h3>
+    <div class="modal modal-tall">
+      <!-- 裝飾圖案區（含 handle） -->
+      <div class="mood-deco" id="moodDeco">
+        <canvas id="moodDecoCanvas"></canvas>
+        <div class="deco-handle"></div>
+      </div>
+      <h3 id="modalDate" class="modal-title modal-title-lg"></h3>
       <p class="modal-hint">選擇今天的心情</p>
       <div class="mood-picker" id="moodPicker">
         <button class="mood-btn" data-mood="😊" title="開心">😊</button>
@@ -169,20 +173,26 @@
         <button class="mood-btn" data-mood="😴" title="疲倦">😴</button>
         <button class="mood-btn" data-mood="😍" title="戀愛">😍</button>
       </div>
-      <textarea id="moodNote" class="textarea" placeholder="寫下今天的心情筆記…" rows="3"></textarea>
-      <div class="modal-actions">
+      <textarea id="moodNote" class="textarea textarea-tall" placeholder="寫下今天的心情筆記…" rows="4"></textarea>
+      <div class="modal-actions modal-actions-col">
         <button id="saveMood" class="btn btn-primary">儲存</button>
-        <button id="deleteMood" class="btn btn-danger">刪除</button>
-        <button id="cancelMood" class="btn btn-ghost">取消</button>
+        <div class="modal-actions-row">
+          <button id="deleteMood" class="btn btn-danger">刪除記錄</button>
+          <button id="cancelMood" class="btn btn-ghost">取消</button>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Quick Add Diary Panel -->
   <div id="quickAddPanel" class="modal-overlay hidden">
-    <div class="modal">
-      <div class="modal-handle"></div>
-      <h3 class="modal-title">新增日記</h3>
+    <div class="modal modal-tall">
+      <!-- 裝飾圖案區（含 handle） -->
+      <div class="mood-deco" id="quickDeco">
+        <canvas id="quickDecoCanvas"></canvas>
+        <div class="deco-handle"></div>
+      </div>
+      <h3 class="modal-title modal-title-lg">新增日記</h3>
       <input type="date" id="quickDate" class="input">
       <p class="modal-hint" style="margin-bottom:10px">選擇心情</p>
       <div class="mood-picker" id="quickMoodPicker">
@@ -192,8 +202,8 @@
         <button class="mood-btn" data-mood="😴" title="疲倦">😴</button>
         <button class="mood-btn" data-mood="😍" title="戀愛">😍</button>
       </div>
-      <textarea id="quickNote" class="textarea" placeholder="寫下今天的心情筆記…" rows="3"></textarea>
-      <div class="modal-actions">
+      <textarea id="quickNote" class="textarea textarea-tall" placeholder="寫下今天的心情筆記…" rows="4"></textarea>
+      <div class="modal-actions modal-actions-col">
         <button id="quickSave" class="btn btn-primary">儲存</button>
         <button id="quickCancel" class="btn btn-ghost">取消</button>
       </div>

@@ -369,10 +369,185 @@ function renderMoodHistory(y, m) {
     </div>`).join('');
 }
 
+// ── 裝飾圖案系統 ────────────────────────────────────
+
+// 每個心情對應的色彩組
+const MOOD_COLORS = {
+  '😊': { c1: '#FEF3C7', c2: '#FCD34D', c3: '#F59E0B' }, // 黃色系
+  '😢': { c1: '#DBEAFE', c2: '#93C5FD', c3: '#3B82F6' }, // 藍色系
+  '😡': { c1: '#FEE2E2', c2: '#FCA5A5', c3: '#EF4444' }, // 紅色系
+  '😴': { c1: '#EDE9FE', c2: '#C4B5FD', c3: '#8B5CF6' }, // 紫色系
+  '😍': { c1: '#FCE7F3', c2: '#F9A8D4', c3: '#EC4899' }, // 粉色系
+};
+const DEFAULT_DECO_COLORS = { c1: '#EDE9FE', c2: '#C4B5FD', c3: '#8B5CF6' };
+
+let currentDecoStyle = 0; // 0-3，每次開 modal 時隨機
+
+// 繪製裝飾圖案到指定 canvas
+function drawDecoration(mood, canvasId, decoId) {
+  const canvas = document.getElementById(canvasId);
+  const deco   = document.getElementById(decoId);
+  if (!canvas || !deco) return;
+
+  const colors = MOOD_COLORS[mood] || DEFAULT_DECO_COLORS;
+  const W = deco.offsetWidth || 360;
+  const H = 120;
+  canvas.width  = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  switch (currentDecoStyle) {
+    case 0: drawStarsHearts(ctx, W, H, colors); break;
+    case 1: drawWatercolor(ctx, W, H, colors);  break;
+    case 2: drawPolkaDots(ctx, W, H, colors);   break;
+    case 3: drawGeometric(ctx, W, H, colors);   break;
+  }
+}
+
+// 風格一：漂浮星星與愛心
+function drawStarsHearts(ctx, W, H, c) {
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, c.c1);
+  bg.addColorStop(1, c.c2);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+  // 星星
+  const rng = seededRng(currentDecoStyle * 31 + W);
+  for (let i = 0; i < 14; i++) {
+    drawStar(ctx, rng() * W, rng() * H, 5 + rng() * 9, c.c3, 0.55 + rng() * 0.4);
+  }
+  // 愛心
+  for (let i = 0; i < 8; i++) {
+    drawHeart(ctx, rng() * W, rng() * H, 7 + rng() * 8, c.c3, 0.45 + rng() * 0.4);
+  }
+}
+
+// 風格二：水彩暈染
+function drawWatercolor(ctx, W, H, c) {
+  ctx.fillStyle = c.c1;
+  ctx.fillRect(0, 0, W, H);
+  const rng = seededRng(currentDecoStyle * 17 + W);
+  for (let i = 0; i < 6; i++) {
+    const x  = rng() * W;
+    const y  = rng() * H;
+    const rx = 50 + rng() * 70;
+    const ry = 30 + rng() * 50;
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, Math.max(rx, ry));
+    grad.addColorStop(0, c.c2 + 'aa');
+    grad.addColorStop(0.5, c.c3 + '44');
+    grad.addColorStop(1, c.c1 + '00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(x, y, rx, ry, rng() * Math.PI, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// 風格三：小碎花點點
+function drawPolkaDots(ctx, W, H, c) {
+  ctx.fillStyle = c.c1;
+  ctx.fillRect(0, 0, W, H);
+  const rng = seededRng(currentDecoStyle * 53 + W);
+  const cols = 14, rows = 5;
+  for (let r = 0; r < rows; r++) {
+    for (let col = 0; col < cols; col++) {
+      const offsetX = (r % 2 === 0) ? 0 : (W / cols / 2);
+      const x = offsetX + (col + 0.5) * (W / cols);
+      const y = (r + 0.5) * (H / rows);
+      const radius = 3 + rng() * 5;
+      const alpha  = 0.25 + rng() * 0.55;
+      const hex = Math.floor(alpha * 255).toString(16).padStart(2, '0');
+      ctx.fillStyle = (rng() > 0.5 ? c.c2 : c.c3) + hex;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+// 風格四：幾何線條
+function drawGeometric(ctx, W, H, c) {
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, c.c1);
+  bg.addColorStop(1, c.c2 + '88');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+  const rng = seededRng(currentDecoStyle * 97 + W);
+  ctx.lineWidth = 1.5;
+  // 線段
+  for (let i = 0; i < 12; i++) {
+    const x1 = rng() * W, y1 = rng() * H;
+    const x2 = x1 + (rng() - 0.5) * 140;
+    const y2 = y1 + (rng() - 0.5) * 80;
+    const alpha = Math.floor((0.2 + rng() * 0.4) * 255).toString(16).padStart(2, '0');
+    ctx.strokeStyle = c.c3 + alpha;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+  // 三角形
+  for (let i = 0; i < 6; i++) {
+    const cx = rng() * W, cy = rng() * H;
+    const s  = 12 + rng() * 20;
+    const alpha = Math.floor((0.25 + rng() * 0.35) * 255).toString(16).padStart(2, '0');
+    ctx.strokeStyle = c.c2 + alpha;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - s);
+    ctx.lineTo(cx + s * 0.866, cy + s * 0.5);
+    ctx.lineTo(cx - s * 0.866, cy + s * 0.5);
+    ctx.closePath();
+    ctx.stroke();
+  }
+}
+
+// ── 繪圖工具函式 ───────────────────────────────────
+
+// 簡單偽亂數（可重現，讓同一面板每次圖案一致）
+function seededRng(seed) {
+  let s = seed | 0;
+  return function () {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
+  };
+}
+
+function drawStar(ctx, x, y, size, color, alpha) {
+  const hex = Math.floor(alpha * 255).toString(16).padStart(2, '0');
+  ctx.fillStyle = color + hex;
+  ctx.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const a  = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+    const ai = ((i * 4 + 2) * Math.PI) / 5 - Math.PI / 2;
+    if (i === 0) ctx.moveTo(x + size * Math.cos(a), y + size * Math.sin(a));
+    else         ctx.lineTo(x + size * Math.cos(a), y + size * Math.sin(a));
+    ctx.lineTo(x + size * 0.4 * Math.cos(ai), y + size * 0.4 * Math.sin(ai));
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawHeart(ctx, x, y, s, color, alpha) {
+  const hex = Math.floor(alpha * 255).toString(16).padStart(2, '0');
+  ctx.fillStyle = color + hex;
+  ctx.beginPath();
+  ctx.moveTo(x, y + s * 0.3);
+  ctx.bezierCurveTo(x, y - s * 0.3, x - s, y - s * 0.3, x - s, y + s * 0.3);
+  ctx.bezierCurveTo(x - s, y + s * 0.85, x, y + s * 1.2, x, y + s * 1.5);
+  ctx.bezierCurveTo(x, y + s * 1.2, x + s, y + s * 0.85, x + s, y + s * 0.3);
+  ctx.bezierCurveTo(x + s, y - s * 0.3, x, y - s * 0.3, x, y + s * 0.3);
+  ctx.closePath();
+  ctx.fill();
+}
+
 // ── Mood Modal ─────────────────────────────────────
 function openMoodModal(dateStr) {
   selectedDate = dateStr;
   selectedMood = null;
+
+  // 每次開啟隨機選一種裝飾風格
+  currentDecoStyle = Math.floor(Math.random() * 4);
 
   document.getElementById('modalDate').textContent = formatDisplayDate(dateStr);
   document.getElementById('moodNote').value = '';
@@ -388,6 +563,9 @@ function openMoodModal(dateStr) {
   }
 
   document.getElementById('moodModal').classList.remove('hidden');
+
+  // 畫裝飾（用 requestAnimationFrame 確保尺寸已計算好）
+  requestAnimationFrame(() => drawDecoration(selectedMood, 'moodDecoCanvas', 'moodDeco'));
 }
 
 function saveMood() {
@@ -417,10 +595,14 @@ function deleteMood() {
 // ── 快速新增日記面板 ───────────────────────────────
 function openQuickAdd() {
   quickSelectedMood = null;
+  currentDecoStyle = Math.floor(Math.random() * 4);
+
   document.getElementById('quickDate').value = todayStr();
   document.getElementById('quickNote').value = '';
   document.querySelectorAll('#quickMoodPicker .mood-btn').forEach(b => b.classList.remove('selected'));
   document.getElementById('quickAddPanel').classList.remove('hidden');
+
+  requestAnimationFrame(() => drawDecoration(null, 'quickDecoCanvas', 'quickDeco'));
 }
 
 function saveQuickDiary() {
@@ -609,6 +791,8 @@ document.querySelectorAll('#moodPicker .mood-btn').forEach(btn => {
     selectedMood = this.dataset.mood;
     document.querySelectorAll('#moodPicker .mood-btn').forEach(b => b.classList.remove('selected'));
     this.classList.add('selected');
+    // 依心情重繪裝飾
+    drawDecoration(selectedMood, 'moodDecoCanvas', 'moodDeco');
   });
 });
 
@@ -628,6 +812,8 @@ document.querySelectorAll('#quickMoodPicker .mood-btn').forEach(btn => {
     quickSelectedMood = this.dataset.mood;
     document.querySelectorAll('#quickMoodPicker .mood-btn').forEach(b => b.classList.remove('selected'));
     this.classList.add('selected');
+    // 依心情重繪裝飾
+    drawDecoration(quickSelectedMood, 'quickDecoCanvas', 'quickDeco');
   });
 });
 
