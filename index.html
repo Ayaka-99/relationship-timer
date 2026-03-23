@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#7C3AED">
+  <meta name="theme-color" content="#7C3AED" id="themeColorMeta">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="關係計時器">
@@ -46,7 +46,62 @@
         </div>
         <div id="moodHistory" class="mood-history"></div>
       </section>
+
+      <!-- Settings Page -->
+      <section id="settingsPage" class="page">
+        <div class="settings-card">
+          <h2 class="settings-section-title">主題風格</h2>
+          <div class="theme-list" id="themeList">
+            <button class="theme-option" data-theme="purple">
+              <span class="theme-swatch" style="background:linear-gradient(135deg,#7C3AED,#A855F7)"></span>
+              <span class="theme-name">💜 紫夢</span>
+              <span class="theme-check" id="check-purple">✓</span>
+            </button>
+            <button class="theme-option" data-theme="pink">
+              <span class="theme-swatch" style="background:linear-gradient(135deg,#DB2777,#EC4899)"></span>
+              <span class="theme-name">🌸 櫻花粉</span>
+              <span class="theme-check" id="check-pink"></span>
+            </button>
+            <button class="theme-option" data-theme="blue">
+              <span class="theme-swatch" style="background:linear-gradient(135deg,#0284C7,#38BDF8)"></span>
+              <span class="theme-name">🌊 海洋藍</span>
+              <span class="theme-check" id="check-blue"></span>
+            </button>
+            <button class="theme-option" data-theme="green">
+              <span class="theme-swatch" style="background:linear-gradient(135deg,#059669,#34D399)"></span>
+              <span class="theme-name">🌿 森林綠</span>
+              <span class="theme-check" id="check-green"></span>
+            </button>
+            <button class="theme-option" data-theme="dark">
+              <span class="theme-swatch" style="background:linear-gradient(135deg,#312E81,#4C1D95)"></span>
+              <span class="theme-name">🌙 暗夜黑</span>
+              <span class="theme-check" id="check-dark"></span>
+            </button>
+            <button class="theme-option" data-theme="custom">
+              <span class="theme-swatch theme-swatch-custom" id="customSwatch">🎨</span>
+              <span class="theme-name">✏️ 自訂主題</span>
+              <span class="theme-check" id="check-custom"></span>
+            </button>
+          </div>
+
+          <!-- 自訂主題色彩選擇器 -->
+          <div id="customThemePanel" class="custom-theme-panel hidden">
+            <div class="color-row">
+              <label class="color-label">主色</label>
+              <input type="color" id="customPrimary" value="#7C3AED" class="color-picker">
+            </div>
+            <div class="color-row">
+              <label class="color-label">副色</label>
+              <input type="color" id="customLight" value="#A855F7" class="color-picker">
+            </div>
+            <button id="applyCustomTheme" class="btn btn-primary" style="margin-top:12px">套用自訂主題</button>
+          </div>
+        </div>
+      </section>
     </main>
+
+    <!-- 日記頁懸浮新增按鈕 -->
+    <button id="diaryFab" class="fab hidden" aria-label="新增日記">＋</button>
 
     <nav class="bottom-nav">
       <button class="nav-item active" data-page="friends">
@@ -57,8 +112,49 @@
         <span class="nav-icon">📔</span>
         <span class="nav-label">心情日記</span>
       </button>
+      <button class="nav-item" data-page="settings">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">設定</span>
+      </button>
     </nav>
   </div>
+
+  <!-- 朋友詳情頁（全螢幕覆蓋層） -->
+  <div id="friendDetailPage" class="friend-detail-overlay hidden">
+    <div class="detail-header">
+      <button id="backBtn" class="back-btn" aria-label="返回">‹</button>
+      <span class="detail-header-title">朋友詳情</span>
+    </div>
+    <div class="detail-content">
+      <!-- 大頭照區塊 -->
+      <div class="detail-avatar-wrap">
+        <div id="detailAvatar" class="detail-avatar"></div>
+        <button id="changePhotoBtn" class="change-photo-btn">編輯照片</button>
+      </div>
+      <div id="detailName" class="detail-name"></div>
+      <div id="detailDays" class="detail-days-text"></div>
+      <div id="detailSince" class="detail-since-text"></div>
+
+      <!-- 備註文字 -->
+      <div class="detail-section">
+        <div class="detail-section-label">備註</div>
+        <textarea id="detailNote" class="textarea" placeholder="輸入備註…" rows="4"></textarea>
+        <button id="saveNoteBtn" class="btn btn-primary">儲存備註</button>
+      </div>
+
+      <!-- 備註圖片 -->
+      <div class="detail-section">
+        <div class="detail-section-label">備註圖片</div>
+        <div id="noteImagesGrid" class="note-images-grid"></div>
+        <button id="addNoteImageBtn" class="btn btn-ghost" style="margin-top:10px">＋ 新增圖片</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 隱藏的檔案輸入（大頭照） -->
+  <input type="file" id="photoInput" accept="image/*" style="display:none">
+  <!-- 隱藏的檔案輸入（備註圖片） -->
+  <input type="file" id="noteImageInput" accept="image/*" style="display:none">
 
   <!-- Mood Modal -->
   <div id="moodModal" class="modal-overlay hidden">
@@ -78,6 +174,28 @@
         <button id="saveMood" class="btn btn-primary">儲存</button>
         <button id="deleteMood" class="btn btn-danger">刪除</button>
         <button id="cancelMood" class="btn btn-ghost">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Add Diary Panel -->
+  <div id="quickAddPanel" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">新增日記</h3>
+      <input type="date" id="quickDate" class="input">
+      <p class="modal-hint" style="margin-bottom:10px">選擇心情</p>
+      <div class="mood-picker" id="quickMoodPicker">
+        <button class="mood-btn" data-mood="😊" title="開心">😊</button>
+        <button class="mood-btn" data-mood="😢" title="難過">😢</button>
+        <button class="mood-btn" data-mood="😡" title="生氣">😡</button>
+        <button class="mood-btn" data-mood="😴" title="疲倦">😴</button>
+        <button class="mood-btn" data-mood="😍" title="戀愛">😍</button>
+      </div>
+      <textarea id="quickNote" class="textarea" placeholder="寫下今天的心情筆記…" rows="3"></textarea>
+      <div class="modal-actions">
+        <button id="quickSave" class="btn btn-primary">儲存</button>
+        <button id="quickCancel" class="btn btn-ghost">取消</button>
       </div>
     </div>
   </div>
