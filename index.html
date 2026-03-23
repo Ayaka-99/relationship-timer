@@ -27,6 +27,18 @@
           <input type="date" id="friendDate" class="input">
           <button id="addFriendBtn" class="btn btn-primary">新增朋友</button>
         </div>
+        <!-- 關係健康度儀表板（可收合） -->
+        <div class="health-card" id="healthDashboard">
+          <button class="health-header" id="healthToggle">
+            <span class="health-header-title">💝 關係健康度</span>
+            <span id="healthToggleIcon" class="health-toggle-icon">▾</span>
+          </button>
+          <div class="health-body" id="healthBody">
+            <div id="healthStats" class="health-stats"></div>
+          </div>
+        </div>
+        <!-- 即將生日 -->
+        <div id="upcomingBirthdays"></div>
         <div id="friendsList" class="friends-list"></div>
       </section>
 
@@ -45,6 +57,11 @@
           <div id="calendarDays" class="calendar-grid"></div>
         </div>
         <div id="moodHistory" class="mood-history"></div>
+      </section>
+
+      <!-- Capsule Page -->
+      <section id="capsulePage" class="page">
+        <div id="capsuleList" class="capsule-list"></div>
       </section>
 
       <!-- Settings Page -->
@@ -102,6 +119,8 @@
 
     <!-- 日記頁懸浮新增按鈕 -->
     <button id="diaryFab" class="fab hidden" aria-label="新增日記">＋</button>
+    <!-- 膠囊頁懸浮新增按鈕 -->
+    <button id="capsuleFab" class="fab fab-secondary hidden" aria-label="新增膠囊">＋</button>
 
     <nav class="bottom-nav">
       <button class="nav-item active" data-page="friends">
@@ -111,6 +130,10 @@
       <button class="nav-item" data-page="diary">
         <span class="nav-icon">📔</span>
         <span class="nav-label">心情日記</span>
+      </button>
+      <button class="nav-item" data-page="capsule">
+        <span class="nav-icon">📦</span>
+        <span class="nav-label">膠囊</span>
       </button>
       <button class="nav-item" data-page="settings">
         <span class="nav-icon">⚙️</span>
@@ -134,6 +157,27 @@
       <div id="detailName" class="detail-name"></div>
       <div id="detailDays" class="detail-days-text"></div>
       <div id="detailSince" class="detail-since-text"></div>
+
+      <!-- 生日設定 -->
+      <div class="detail-section">
+        <div class="detail-section-label">🎂 生日（月 / 日）</div>
+        <div class="birthday-row">
+          <select id="birthdayMonth" class="select-input">
+            <option value="">月份</option>
+            <option value="01">1月</option><option value="02">2月</option>
+            <option value="03">3月</option><option value="04">4月</option>
+            <option value="05">5月</option><option value="06">6月</option>
+            <option value="07">7月</option><option value="08">8月</option>
+            <option value="09">9月</option><option value="10">10月</option>
+            <option value="11">11月</option><option value="12">12月</option>
+          </select>
+          <select id="birthdayDay" class="select-input">
+            <option value="">日期</option>
+          </select>
+          <button id="saveBirthdayBtn" class="btn btn-primary bday-save-btn">儲存</button>
+        </div>
+        <div id="birthdayInfo" class="birthday-info"></div>
+      </div>
 
       <!-- 備註文字 -->
       <div class="detail-section">
@@ -222,6 +266,58 @@
       </div>
     </div>
   </div>
+
+  <!-- 生日慶祝彈窗 -->
+  <div id="birthdayOverlay" class="birthday-overlay hidden">
+    <div id="confettiContainer" class="confetti-container"></div>
+    <div class="birthday-message">
+      <div class="birthday-emoji-big">🎂</div>
+      <div id="birthdayText" class="birthday-text"></div>
+      <button id="closeBirthday" class="btn btn-primary">🎉 太棒了！</button>
+    </div>
+  </div>
+
+  <!-- 新增膠囊 Modal -->
+  <div id="capsuleModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">📦 新增回憶膠囊</h3>
+      <input type="text" id="capsuleTitle" class="input" placeholder="膠囊標題" maxlength="30">
+      <textarea id="capsuleContent" class="textarea" placeholder="寫下想留給未來自己的話…" rows="4"></textarea>
+      <div class="capsule-photo-row">
+        <button id="capsulePhotoBtn" class="btn btn-ghost">📷 新增照片</button>
+        <div id="capsulePhotoPreview" class="capsule-photo-preview"></div>
+      </div>
+      <p class="input-label-text">📅 開啟日期（只能選未來）</p>
+      <input type="date" id="capsuleUnlockDate" class="input">
+      <p class="input-label-text">👤 關聯朋友（可選）</p>
+      <select id="capsuleFriendSelect" class="input">
+        <option value="">不關聯特定朋友</option>
+      </select>
+      <div class="modal-actions">
+        <button id="saveCapsule" class="btn btn-primary">封存膠囊</button>
+        <button id="cancelCapsule" class="btn btn-ghost">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 膠囊詳情 Modal -->
+  <div id="capsuleDetailModal" class="modal-overlay hidden">
+    <div class="modal modal-tall">
+      <div class="mood-deco capsule-deco" id="capsuleDecoArea">
+        <div class="deco-handle"></div>
+      </div>
+      <h3 id="capsuleDetailTitle" class="modal-title modal-title-lg"></h3>
+      <div id="capsuleDetailBody" class="capsule-detail-body"></div>
+      <div class="modal-actions">
+        <button id="deleteCapsule" class="btn btn-danger">刪除膠囊</button>
+        <button id="closeCapsuleDetail" class="btn btn-ghost">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 隱藏的膠囊照片輸入 -->
+  <input type="file" id="capsulePhotoInput" accept="image/*" style="display:none">
 
   <script src="app.js"></script>
 </body>
