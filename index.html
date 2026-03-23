@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#7C3AED">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="關係計時器">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <title>關係計時器</title>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1 class="header-title" id="pageTitle">朋友列表</h1>
+    </header>
+
+    <main class="main">
+      <!-- Friends Page -->
+      <section id="friendsPage" class="page active">
+        <div class="add-card">
+          <h2>新增朋友</h2>
+          <input type="text" id="friendName" placeholder="朋友姓名" class="input" maxlength="20">
+          <input type="date" id="friendDate" class="input">
+          <button id="addFriendBtn" class="btn btn-primary">新增朋友</button>
+        </div>
+        <div id="friendsList" class="friends-list"></div>
+      </section>
+
+      <!-- Diary Page -->
+      <section id="diaryPage" class="page">
+        <div class="calendar-card">
+          <div class="calendar-nav">
+            <button id="prevMonth" class="nav-btn" aria-label="上個月">‹</button>
+            <span id="monthYear" class="month-title"></span>
+            <button id="nextMonth" class="nav-btn" aria-label="下個月">›</button>
+          </div>
+          <div class="calendar-weekdays">
+            <div>日</div><div>一</div><div>二</div>
+            <div>三</div><div>四</div><div>五</div><div>六</div>
+          </div>
+          <div id="calendarDays" class="calendar-grid"></div>
+        </div>
+        <div id="moodHistory" class="mood-history"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-page="friends">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">朋友</span>
+      </button>
+      <button class="nav-item" data-page="diary">
+        <span class="nav-icon">📔</span>
+        <span class="nav-label">心情日記</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Mood Modal -->
+  <div id="moodModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h3 id="modalDate" class="modal-title"></h3>
+      <p class="modal-hint">選擇今天的心情</p>
+      <div class="mood-picker" id="moodPicker">
+        <button class="mood-btn" data-mood="😊" title="開心">😊</button>
+        <button class="mood-btn" data-mood="😢" title="難過">😢</button>
+        <button class="mood-btn" data-mood="😡" title="生氣">😡</button>
+        <button class="mood-btn" data-mood="😴" title="疲倦">😴</button>
+        <button class="mood-btn" data-mood="😍" title="戀愛">😍</button>
+      </div>
+      <textarea id="moodNote" class="textarea" placeholder="寫下今天的心情筆記…" rows="3"></textarea>
+      <div class="modal-actions">
+        <button id="saveMood" class="btn btn-primary">儲存</button>
+        <button id="deleteMood" class="btn btn-danger">刪除</button>
+        <button id="cancelMood" class="btn btn-ghost">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Delete Modal -->
+  <div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">確定刪除？</h3>
+      <p id="confirmText" class="confirm-text"></p>
+      <div class="modal-actions">
+        <button id="confirmYes" class="btn btn-danger">刪除</button>
+        <button id="confirmNo" class="btn btn-ghost">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

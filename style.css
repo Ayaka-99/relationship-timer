@@ -1,0 +1,589 @@
+:root {
+  --primary: #7C3AED;
+  --primary-light: #A855F7;
+  --primary-pale: #F3E8FF;
+  --grad: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+  --bg: #F5F3FF;
+  --card: #ffffff;
+  --text: #1E1B2E;
+  --text-2: #6B7280;
+  --border: #E5E7EB;
+  --red: #EF4444;
+  --red-pale: #FEF2F2;
+  --shadow: 0 2px 16px rgba(124, 58, 237, 0.10);
+  --shadow-md: 0 4px 24px rgba(124, 58, 237, 0.18);
+  --radius: 18px;
+  --radius-sm: 12px;
+  --nav-h: 64px;
+  --header-h: 58px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── App Shell ─────────────────────────────────── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Header ─────────────────────────────────────── */
+.header {
+  background: var(--grad);
+  height: calc(var(--header-h) + env(safe-area-inset-top));
+  padding: calc(env(safe-area-inset-top) + 14px) 20px 14px;
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.30);
+  z-index: 10;
+}
+
+.header-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+/* ── Main Scroll ─────────────────────────────────── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 16px 0;
+  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
+  scroll-behavior: smooth;
+}
+
+.main::-webkit-scrollbar { display: none; }
+
+/* ── Pages ───────────────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── Add Friend Card ─────────────────────────────── */
+.add-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.add-card h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Inputs ──────────────────────────────────────── */
+.input {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text);
+  background: #FAFAFA;
+  margin-bottom: 10px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  background: #fff;
+}
+
+.input.error {
+  border-color: var(--red);
+  animation: shake 0.35s ease;
+}
+
+/* ── Buttons ─────────────────────────────────────── */
+.btn {
+  padding: 13px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.btn:active { transform: scale(0.97); opacity: 0.9; }
+
+.btn-primary {
+  background: var(--grad);
+  color: #fff;
+  width: 100%;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.38);
+}
+
+.btn-danger {
+  background: var(--red-pale);
+  color: var(--red);
+  border: 1.5px solid #FECACA;
+}
+
+.btn-ghost {
+  background: var(--bg);
+  color: var(--text-2);
+  border: 1.5px solid var(--border);
+}
+
+/* ── Friend Cards ────────────────────────────────── */
+.friends-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 8px;
+}
+
+.friend-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.25s ease both;
+}
+
+.friend-avatar {
+  width: 50px;
+  height: 50px;
+  background: var(--grad);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(124, 58, 237, 0.30);
+  user-select: none;
+}
+
+.friend-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.friend-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.friend-days {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 3px 0 2px;
+}
+
+.friend-since {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.delete-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: var(--red-pale);
+  color: var(--red);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:active { background: #FECACA; }
+
+/* ── Calendar Card ───────────────────────────────── */
+.calendar-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.month-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.nav-btn {
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: var(--bg);
+  border-radius: 50%;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.nav-btn:active { background: var(--primary-pale); }
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+}
+
+.calendar-weekdays div {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  padding: 2px 0 6px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+  gap: 1px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.calendar-day.empty { cursor: default; }
+
+.calendar-day:not(.empty):hover { background: var(--bg); }
+.calendar-day:not(.empty):active { background: var(--primary-pale); }
+
+.calendar-day.today {
+  background: var(--grad);
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.35);
+}
+
+.calendar-day.today .day-num { color: #fff; font-weight: 800; }
+
+.calendar-day.has-mood:not(.today) {
+  background: var(--primary-pale);
+}
+
+.day-num {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+
+.day-mood {
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* ── Mood History ────────────────────────────────── */
+.mood-history {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mood-entry {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  animation: slideIn 0.2s ease both;
+  transition: transform 0.12s;
+}
+
+.mood-entry:active { transform: scale(0.99); }
+
+.entry-emoji { font-size: 30px; flex-shrink: 0; }
+
+.entry-content { flex: 1; min-width: 0; }
+
+.entry-date {
+  font-size: 12px;
+  color: var(--text-2);
+  margin-bottom: 3px;
+  font-weight: 500;
+}
+
+.entry-note {
+  font-size: 14px;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+/* ── Bottom Nav ──────────────────────────────────── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.07);
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  flex: 1;
+  border: none;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  color: var(--text-2);
+  padding: 10px 0 8px;
+  transition: color 0.2s;
+  font-family: inherit;
+}
+
+.nav-item.active { color: var(--primary); }
+
+.nav-icon { font-size: 22px; }
+
+.nav-label { font-size: 11px; font-weight: 600; }
+
+/* ── Modals ──────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 10, 30, 0.55);
+  display: flex;
+  align-items: flex-end;
+  z-index: 200;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.modal-overlay.hidden { display: none; }
+
+.modal {
+  background: var(--card);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 12px 20px calc(20px + env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  animation: slideUp 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.modal-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.modal-hint {
+  font-size: 13px;
+  color: var(--text-2);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.confirm-text {
+  font-size: 15px;
+  color: var(--text-2);
+  text-align: center;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* ── Mood Picker ─────────────────────────────────── */
+.mood-picker {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.mood-btn {
+  width: 54px;
+  height: 54px;
+  border: 2.5px solid var(--border);
+  background: #fff;
+  border-radius: 50%;
+  font-size: 26px;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mood-btn:hover { transform: scale(1.08); }
+
+.mood-btn.selected {
+  border-color: var(--primary);
+  background: var(--primary-pale);
+  transform: scale(1.18);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.18);
+}
+
+.mood-picker.error {
+  animation: shake 0.35s ease;
+}
+
+/* ── Textarea ────────────────────────────────────── */
+.textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 13px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--text);
+  background: #FAFAFA;
+  resize: vertical;
+  outline: none;
+  margin-bottom: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  line-height: 1.5;
+}
+
+.textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  background: #fff;
+}
+
+/* ── Modal Actions ───────────────────────────────── */
+.modal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-actions .btn { flex: 1; }
+
+/* ── Empty State ─────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  color: var(--text-2);
+  padding: 36px 16px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.empty-state-icon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* ── Animations ──────────────────────────────────── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
+
+/* ── Desktop ─────────────────────────────────────── */
+@media (min-width: 480px) {
+  .app { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .bottom-nav { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+}
